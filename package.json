@@ -1,7 +1,7 @@
 {
-  "name": "nodejs-ex",
+  "name": "srboa-webserver",
   "version": "0.0.1",
-  "description": "Node.js sample app for OpenShift 3",
+  "description": "BOA Web Server apps for OCP",
   "main": "server.js",
   "dependencies": {
     "chai": "^3.5.0",
@@ -23,12 +23,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/sclorg/nodejs-ex.git"
+    "url": "https://github.com/G1KMP02/srboa-webserver.git"
   },
-  "author": "Steve Speicher <sspeiche@gmail.com>",
+  "author": "Kurt Pedersen <kurt.pedersen@chi.frb.org>",
   "license": "CC-BY-1.0",
   "bugs": {
-    "url": "http://github.com/sclorg/nodejs-ex/issues"
+    "url": "https://github.com/G1KMP02/srboa-webserver/issues"
   },
-  "homepage": "http://github.com/sclorg/nodejs-ex"
+  "homepage": "https://github.com/G1KMP02/srboa-webserver"
 }
