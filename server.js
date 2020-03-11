@@ -1,17 +1,31 @@
-//  OpenShift sample Node application
-var express = require('express'),
-    app     = express(),
-    morgan  = require('morgan');
-    
+//  OpenShift Node application
+var express = require('express');
+var app     = express();
+var morgan  = require('morgan');
+var fs      = require('fs');
+var https   = require('https');
+
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
 
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
-    mongoURLLabel = "";
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
+var ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+var mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL;
+var mongoURLLabel = "";
+
+// file names of the certs/keys mounted on secret volume
+var HTTPS_CERTIFICATE = process.env.HTTPS_CERTIFICATE;
+var HTTPS_CERTIFICATE_KEY = process.env.HTTPS_CERTIFICATE_KEY;
+var HTTPS_CA_CERTIFICATE = process.env.HTTPS_CA_CERTIFICATE;
+
+var options = {
+    key: HTTPS_CERTIFICATE_KEY,
+    cert: HTTPS_CERTIFICATE,
+    ca: HTTPS_CA_CERTIFICATE
+};
+
 
 if (mongoURL == null) {
   var mongoHost, mongoPort, mongoDatabase, mongoPassword, mongoUser;
@@ -119,7 +133,9 @@ initDb(function(err){
   console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
-app.listen(port, ip);
-console.log('Server running on http://%s:%s', ip, port);
+var httpsServer = https.createServer(options,app);
+httpsServer.listen(port);
+//app.listen(port, ip);
+//console.log('Server running on http://%s:%s', ip, port);
 
 module.exports = app ;
