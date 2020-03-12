@@ -2,8 +2,10 @@
 var express = require('express');
 var app     = express();
 var morgan  = require('morgan');
+var http    = require('http');
 var fs      = require('fs');
 var https   = require('https');
+var server  = http.createServer();
 
 Object.assign=require('object-assign')
 
@@ -15,17 +17,23 @@ var ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 var mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL;
 var mongoURLLabel = "";
 
-// file names of the certs/keys mounted on secret volume
+// Get password to unwrap server key
+var HTTPS_PASSWORD = process.env.HTTPS_PASSWORD;
+// This is the path to the mounted secret volume with certs/keys
+var HTTPS_CERTIFICATE_DIR = process.env.HTTPS_CERTIFICATE_DIR;
+// File names for the certs/keys on the mounted secret volume
 var HTTPS_CERTIFICATE = process.env.HTTPS_CERTIFICATE;
 var HTTPS_CERTIFICATE_KEY = process.env.HTTPS_CERTIFICATE_KEY;
 var HTTPS_CA_CERTIFICATE = process.env.HTTPS_CA_CERTIFICATE;
 
+// TLS config struct to pass to server init
+// Server Key, Cert, and CA Cert files live in PROJECT_ROOT/alias folder
 var options = {
-    key: HTTPS_CERTIFICATE_KEY,
-    cert: HTTPS_CERTIFICATE,
-    ca: HTTPS_CA_CERTIFICATE
+    key: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE_KEY),
+    cert: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE),
+    ca: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CA_CERTIFICATE),
+    passphrase: HTTPS_PASSWORD
 };
-
 
 if (mongoURL == null) {
   var mongoHost, mongoPort, mongoDatabase, mongoPassword, mongoUser;
@@ -133,8 +141,11 @@ initDb(function(err){
   console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
-var httpsServer = https.createServer(options,app);
-httpsServer.listen(port);
+// create listener with TLS options
+https.createServer(options, function (req, res) {
+  res.writeHead(200);
+  res.end("hello world\n");
+}).listen(8443);
 //app.listen(port, ip);
 //console.log('Server running on http://%s:%s', ip, port);
 
