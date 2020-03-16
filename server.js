@@ -26,9 +26,9 @@ var HTTPS_CERTIFICATE_KEY = process.env.HTTPS_CERTIFICATE_KEY;
 var HTTPS_CA_CERTIFICATE = process.env.HTTPS_CA_CERTIFICATE;
 
 var options = {
-    key: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE_KEY),
-    cert: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE),
-    ca: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CA_CERTIFICATE),
+    key: HTTPS_CERTIFICATE_KEY,
+    cert: HTTPS_CERTIFICATE,
+    ca: HTTPS_CA_CERTIFICATE,
     passphrase: HTTPS_PASSWORD
 };
 
