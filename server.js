@@ -1,39 +1,17 @@
-//  OpenShift Node application
-var express = require('express');
-var app     = express();
-var morgan  = require('morgan');
-var http    = require('http');
-var fs      = require('fs');
-var https   = require('https');
-var server  = http.createServer();
-
+//  OpenShift sample Node application
+var express = require('express'),
+    app     = express(),
+    morgan  = require('morgan');
+    
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
 
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8443;
-var ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
-var mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL;
-var mongoURLLabel = "";
-
-// Get password to unwrap server key
-var HTTPS_PASSWORD = process.env.HTTPS_PASSWORD;
-// This is the path to the mounted secret volume with certs/keys
-var HTTPS_CERTIFICATE_DIR = process.env.HTTPS_CERTIFICATE_DIR;
-// File names for the certs/keys on the mounted secret volume
-var HTTPS_CERTIFICATE = process.env.HTTPS_CERTIFICATE;
-var HTTPS_CERTIFICATE_KEY = process.env.HTTPS_CERTIFICATE_KEY;
-var HTTPS_CA_CERTIFICATE = process.env.HTTPS_CA_CERTIFICATE;
-
-// TLS config struct to pass to server init
-// Server Key, Cert, and CA Cert files live in PROJECT_ROOT/alias folder
-var options = {
-    key: HTTPS_CERTIFICATE_KEY,
-    cert: HTTPS_CERTIFICATE,
-    ca: HTTPS_CA_CERTIFICATE,
-    passphrase: HTTPS_PASSWORD
-};
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
+    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
+    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+    mongoURLLabel = "";
 
 if (mongoURL == null) {
   var mongoHost, mongoPort, mongoDatabase, mongoPassword, mongoUser;
@@ -141,10 +119,7 @@ initDb(function(err){
   console.log('Error connecting to Mongo. Message:\n'+err);
 });
 
-// listen (start app with node server.js) ======================================
-var httpsServer = https.createServer(options,app);
-httpsServer.listen(port);
-//app.listen(port, ip);
-//console.log('Server running on http://%s:%s', ip, port);
+app.listen(port, ip);
+console.log('Server running on http://%s:%s', ip, port);
 
 module.exports = app ;
