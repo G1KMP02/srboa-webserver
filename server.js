@@ -141,8 +141,8 @@ initDb(function(err){
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
 
+module.exports = app ;
+
 // listen (start app with node server.js) ======================================
 var httpsServer = https.createServer(options,app);
 httpsServer.listen(port);
-
-module.exports = app ;
