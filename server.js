@@ -1,17 +1,36 @@
 //  OpenShift sample Node application
-var express = require('express'),
-    app     = express(),
-    morgan  = require('morgan');
+var express = require('express');
+var app     = express();
+var morgan  = require('morgan');
     
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
 
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
-    mongoURLLabel = "";
+var port = process.env.PORT || 8443;        // set the port
+var ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+var mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL;
+var mongoURLLabel = "";
+
+var fs = require('fs');
+var https = require('https');
+
+// tls configuration
+var HTTPS_PASSWORD = process.env.HTTPS_PASSWORD;
+// path to the mounted secret volume with certs/keys
+var HTTPS_CERTIFICATE_DIR = process.env.HTTPS_CERTIFICATE_DIR;
+// file names of the certs/keys mounted on secret volume
+var HTTPS_CERTIFICATE = process.env.HTTPS_CERTIFICATE;
+var HTTPS_CERTIFICATE_KEY = process.env.HTTPS_CERTIFICATE_KEY;
+var HTTPS_CA_CERTIFICATE = process.env.HTTPS_CA_CERTIFICATE;
+
+var options = {
+    key: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE_KEY),
+    cert: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CERTIFICATE),
+    ca: fs.readFileSync(HTTPS_CERTIFICATE_DIR + '/' + HTTPS_CA_CERTIFICATE),
+    passphrase: HTTPS_PASSWORD
+};
 
 if (mongoURL == null) {
   var mongoHost, mongoPort, mongoDatabase, mongoPassword, mongoUser;
@@ -121,5 +140,9 @@ initDb(function(err){
 
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
+
+// listen (start app with node server.js) ======================================
+var httpsServer = https.createServer(options,app);
+httpsServer.listen(port);
 
 module.exports = app ;
